@@ -1,0 +1,98 @@
+# Toy Watchtower MMM hyperparameters.
+#
+# This mirrors the shape of production Watchtower config without carrying every
+# production option. The important teaching idea is that each hierarchy embedding
+# has a layer-level regularization lambda plus axis weights.
+#
+# Effective L2 penalty for an axis is:
+#
+#   effective_lambda(axis) = layer_reg_lambda * reg_<axis>
+#
+# The walkthrough keeps lambdas at 0.0 so the simulated truth is recovered very
+# clearly. To demonstrate pooling, try layer_reg_lambda values such as 0.00005
+# for sigmoid_curve, beta_gamma, or pricing.
+
+training:
+  optimizer: adam
+  learning_rate: 0.012
+  epochs: 1024
+  snapshot_interval: 50
+  history_interval: 5
+  fallback_l2_strength: 0.0
+
+roi:
+  sigmoid_curve:
+    asymptote_lower_bound: 0.4
+    asymptote_upper_bound: 2.4
+    initial_slope_lower_bound: 0.4
+    initial_slope_upper_bound: 1.9
+
+  beta_gamma:
+    beta_min: 0.01
+    beta_max: 1.0
+    gamma_min: 0.01
+    gamma_max: 0.99
+
+  alpha_mult:
+    center: 0.8
+    alpha_mult_range: 0.8
+
+embeddings:
+  baseline:
+    regularization_strategy: l2
+    layer_reg_lambda: 0.0
+    reg_bias: 0.0
+    reg_region: 1.0
+    reg_brand: 1.0
+    reg_channel: 1.0
+
+  feature_beta:
+    distribution:
+      regularization_strategy: l2
+      layer_reg_lambda: 0.0
+      reg_bias: 0.0
+      reg_region: 1.0
+      reg_brand: 1.0
+      reg_channel: 1.0
+
+    temperature:
+      regularization_strategy: l2
+      layer_reg_lambda: 0.0
+      reg_bias: 0.0
+      reg_region: 1.0
+      reg_brand: 1.0
+      reg_channel: 1.0
+
+    macro:
+      regularization_strategy: l2
+      layer_reg_lambda: 0.0
+      reg_bias: 0.0
+      reg_region: 1.0
+      reg_brand: 1.0
+      reg_channel: 1.0
+
+  pricing:
+    regularization_strategy: l2
+    layer_reg_lambda: 0.0
+    reg_bias: 0.0
+    reg_region: 1.0
+    reg_brand: 1.0
+    reg_channel: 1.0
+
+  sigmoid_curve:
+    regularization_strategy: l2
+    layer_reg_lambda: 0.0
+    reg_bias: 0.0
+    reg_region: 1.0
+    reg_brand: 1.0
+    reg_channel: 1.0
+    reg_vehicle: 1.0
+
+  beta_gamma:
+    regularization_strategy: l2
+    layer_reg_lambda: 0.0
+    reg_bias: 0.0
+    reg_region: 1.0
+    reg_brand: 1.0
+    reg_channel: 1.0
+    reg_vehicle: 1.0
