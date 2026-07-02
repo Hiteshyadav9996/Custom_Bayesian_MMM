@@ -1,0 +1,18 @@
+[project]
+name = "toy-watchtower-mmm"
+version = "0.1.0"
+description = "Standalone teaching implementation of a small Watchtower-style multiplicative MMM."
+requires-python = ">=3.10"
+dependencies = [
+  "h5py",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "plotly",
+  "PyYAML",
+  "tensorflow",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
