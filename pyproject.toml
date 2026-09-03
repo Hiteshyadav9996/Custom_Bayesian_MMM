@@ -13,6 +13,13 @@ dependencies = [
   "tensorflow",
 ]
 
+[dependency-groups]
+dev = [
+  "ipykernel",
+  "jupyter",
+  "pytest>=8",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
