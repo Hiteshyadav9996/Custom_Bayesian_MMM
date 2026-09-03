@@ -1,7 +1,7 @@
 [project]
-name = "toy-watchtower-mmm"
+name = "toy-mmm"
 version = "0.1.0"
-description = "Standalone teaching implementation of a small Watchtower-style multiplicative MMM."
+description = "Standalone teaching implementation of a small multiplicative MMM."
 requires-python = ">=3.10"
 dependencies = [
   "h5py",
