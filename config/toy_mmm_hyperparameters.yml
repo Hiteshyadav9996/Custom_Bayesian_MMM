@@ -1,6 +1,6 @@
-# Toy Watchtower MMM hyperparameters.
+# Toy MMM hyperparameters.
 #
-# This mirrors the shape of production Watchtower config without carrying every
+# This mirrors the shape of a typical production MMM config without carrying every
 # production option. The important teaching idea is that each hierarchy embedding
 # has a layer-level regularization lambda plus axis weights.
 #

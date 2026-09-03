@@ -1,6 +1,8 @@
-# Custom Bayesian MMM (Toy Watchtower)
+```
+Custom Bayesian MMM (Toy Example)
+```
 
-A standalone, teaching-oriented **Marketing Mix Model (MMM)** that mirrors the Watchtower-style multiplicative architecture. The model is implemented in **TensorFlow/Keras** with hierarchical parameter embeddings, sigmoid media response curves, beta–gamma adstock carryover, and a dedicated price-elasticity layer.
+A standalone, teaching-oriented **Marketing Mix Model (MMM)** built around a multiplicative architecture. The model is implemented in **TensorFlow/Keras** with hierarchical parameter embeddings, sigmoid media response curves, beta–gamma adstock carryover, and a dedicated price-elasticity layer.
 
 This repository is designed for readers with a **mathematics and statistics background** who want to understand *what* is being estimated, *why* the structure looks this way, and *how* to run or adapt the code on their own data.
 
@@ -21,15 +23,19 @@ This repository is designed for readers with a **mathematics and statistics back
 
 ---
 
+
+
 ## What this model does
 
 Given weekly panel data for many **series** (each series is a unique combination of region × brand × channel), the model predicts a normalized sales/volume target from:
 
-| Input type | Examples in the default toy setup | Role |
-|---|---|---|
-| **Generic features** | distribution, temperature, macro index | Multiplicative demand shifters |
-| **Price** | average selling price | Dedicated elasticity curve (not a plain linear beta) |
-| **Media vehicles** | search, social, TV, promo, sponsorship | Sigmoid ROI curves + carryover dynamics |
+
+| Input type           | Examples in the default toy setup      | Role                                                 |
+| -------------------- | -------------------------------------- | ---------------------------------------------------- |
+| **Generic features** | distribution, temperature, macro index | Multiplicative demand shifters                       |
+| **Price**            | average selling price                  | Dedicated elasticity curve (not a plain linear beta) |
+| **Media vehicles**   | search, social, TV, promo, sponsorship | Sigmoid ROI curves + carryover dynamics              |
+
 
 The core idea is **not** a standard additive regression:
 
@@ -47,7 +53,11 @@ This structure keeps interpretability for business users (baseline, price, distr
 
 ---
 
+
+
 ## Mathematical specification
+
+
 
 ### Indexing and data tensors
 
@@ -60,31 +70,35 @@ Let:
 
 Observed inputs (after normalization — see [Normalization](#normalization)):
 
-| Symbol | Shape | Meaning |
-|---|---|---|
-| `f_{s,t,k}` | `(S, T, K)` | Generic feature k for series s at week t |
-| `p_{s,t}` | `(S, T)` | Price (normalized so series-average price ≈ 1 on training data) |
-| `x_{s,t,v}` | `(S, T, V)` | Media spend for vehicle v |
-| `y_{s,t}` | `(S, T)` | Target (normalized volume/sales) |
+
+| Symbol      | Shape       | Meaning                                                         |
+| ----------- | ----------- | --------------------------------------------------------------- |
+| `f_{s,t,k}` | `(S, T, K)` | Generic feature k for series s at week t                        |
+| `p_{s,t}`   | `(S, T)`    | Price (normalized so series-average price ≈ 1 on training data) |
+| `x_{s,t,v}` | `(S, T, V)` | Media spend for vehicle v                                       |
+| `y_{s,t}`   | `(S, T)`    | Target (normalized volume/sales)                                |
+
 
 Each series carries categorical indices `(r(s), b(s), c(s))` for region, brand, and channel.
 
 ---
+
+
 
 ### Top-level prediction equation
 
 The model prediction is:
 
 $$
-\hat{y}_{s,t} = B_s \cdot M_{s,t} + M_{s,t}^{\alpha} \cdot R_{s,t}
+\hat{y}*{s,t} = B_s \cdot M*{s,t} + M_{s,t}^{\alpha} \cdot R_{s,t}
 $$
 
 where:
 
-- **`B_s`** — baseline level for series s (strictly positive after offset initialization)
-- **`M_{s,t}`** — multiplicative impact from generic features and price
-- **`R_{s,t}`** — total media ROI impact (instant + carryover, summed over vehicles)
-- **`α`** — global interaction exponent, constrained to a configurable interval (default ≈ [0.4, 1.2])
+- `B_s` — baseline level for series s (strictly positive after offset initialization)
+- `M_{s,t}` — multiplicative impact from generic features and price
+- `R_{s,t}` — total media ROI impact (instant + carryover, summed over vehicles)
+- `α` — global interaction exponent, constrained to a configurable interval (default ≈ [0.4, 1.2])
 
 **Intuition:**
 
@@ -93,6 +107,8 @@ where:
 - α < 1 dampens interaction; α → 1 recovers a more linear additivity between the multiplicative environment and media.
 
 ---
+
+
 
 ### Hierarchical embeddings (partial pooling)
 
@@ -115,12 +131,14 @@ Each deviation axis is **mean-centered** (e.g. region deviations sum to zero acr
 Regularization penalty (when enabled):
 
 $$
-\mathcal{L}_{\text{reg}} = \sum_{\text{layers}} \sum_{\text{axes}} \lambda_{\text{layer}} \cdot w_{\text{axis}} \cdot \|\delta\|_2^2
+\mathcal{L}*{\text{reg}} = \sum*{\text{layers}} \sum_{\text{axes}} \lambda_{\text{layer}} \cdot w_{\text{axis}} \cdot \delta_2^2
 $$
 
 Effective axis weight: `effective_lambda(axis) = layer_reg_lambda × reg_<axis>` (see `config/toy_mmm_hyperparameters.yml`).
 
 ---
+
+
 
 ### Multiplicative generic features
 
@@ -129,7 +147,7 @@ Each feature k has its own hierarchical beta `β_{s,k}`.
 Per-feature log-contribution (clipped for numerical stability):
 
 $$
-\ell_{s,t,k} = \text{clip}(f_{s,t,k} \cdot \beta_{s,k},\,-1,\,1)
+\ell_{s,t,k} = \text{clip}(f_{s,t,k} \cdot \beta_{s,k},-1,1)
 $$
 
 Multiplicative factor:
@@ -148,6 +166,8 @@ $$
 
 ---
 
+
+
 ### Price elasticity layer
 
 Price is **not** modeled as a linear term. Instead, each series learns a **constant-elasticity-style** multiplier with hierarchical `(offset, exponent)` parameters.
@@ -159,16 +179,16 @@ $$
 $$
 
 $$
-\text{exponent}_s = 0.5 + 4.5 \cdot \sigma(\text{exponent}_s^{\text{raw}}) \in (0.5,\,5.0)
+\text{exponent}_s = 0.5 + 4.5 \cdot \sigma(\text{exponent}_s^{\text{raw}}) \in (0.5,5.0)
 $$
 
 Price multiplier:
 
 $$
-P_{s,t} = \frac{(1 + \text{offset}_s)^{\text{exponent}_s}}{(p_{s,t} + \text{offset}_s)^{\text{exponent}_s}}
+P_{s,t} = \frac{(1 + \text{offset}_s)^{\text{exponent}*s}}{(p*{s,t} + \text{offset}_s)^{\text{exponent}_s}}
 $$
 
-**Key property:** After normalization, `p_{s,t} = 1` corresponds to the series' average training price, and **`P_{s,t} = 1` at that point** — i.e. average price is a **neutral** reference (verified in tests).
+**Key property:** After normalization, `p_{s,t} = 1` corresponds to the series' average training price, and `P_{s,t} = 1` **at that point** — i.e. average price is a **neutral** reference (verified in tests).
 
 Higher price → lower multiplier (holding exponent fixed), consistent with downward-sloping demand.
 
@@ -180,12 +200,14 @@ $$
 
 ---
 
+
+
 ### Media response: sigmoid curve (instant impact)
 
 For each vehicle v, spend is scaled by a vehicle-specific axis scale `a_v` (80th percentile of positive spend on training data):
 
 $$
-\tilde{x}_{s,t,v} = \frac{x_{s,t,v}}{a_v}
+\tilde{x}*{s,t,v} = \frac{x*{s,t,v}}{a_v}
 $$
 
 Each series–vehicle pair learns sigmoid parameters `(A_{s,v}, S_{s,v})` (asymptote and slope), constrained to bounds from the hyperparameter file.
@@ -193,26 +215,28 @@ Each series–vehicle pair learns sigmoid parameters `(A_{s,v}, S_{s,v})` (asymp
 Instantaneous media impact uses a **normalized sigmoid** `σ̃(·)` that passes through zero at zero spend and saturates at asymptote `A_{s,v}`:
 
 $$
-I_{s,t,v} = \underbrace{\frac{N_{\text{vol}}}{N_{\text{spend}}}}_{\text{roi\_unit\_scale}} \cdot a_v \cdot \tilde{\sigma}(\tilde{x}_{s,t,v};\, A_{s,v},\, S_{s,v})
+I_{s,t,v} = \underbrace{\frac{N_{\text{vol}}}{N_{\text{spend}}}}*{\text{roiunitscale}} \cdot a_v \cdot \tilde{\sigma}(\tilde{x}*{s,t,v}; A_{s,v}, S_{s,v})
 $$
 
 where `roi_unit_scale = normalization_factor_spend / normalization_factor` converts normalized spend units back to target units.
 
 **Interpretation:**
 
-- **`A_{s,v}`** — long-run saturation level (maximum incremental impact per week at high spend)
-- **`S_{s,v}`** — steepness of the curve (how quickly impact rises with spend)
+- `A_{s,v}` — long-run saturation level (maximum incremental impact per week at high spend)
+- `S_{s,v}` — steepness of the curve (how quickly impact rises with spend)
 
 This is analogous to a **Hill/saturation function** commonly used in MMM, but with a fixed functional form chosen for stability.
 
 ---
+
+
 
 ### Media carryover: beta–gamma adstock
 
 Instant impact is propagated forward with a **geometric decay** structure parameterized by `(β_{s,v}, γ_{s,v})`:
 
 $$
-C_{s,t,v} = \sum_{\ell=1}^{L} I_{s,t-\ell,v} \cdot \beta_{s,v} \cdot \gamma_{s,v}^{\,\ell-1}
+C_{s,t,v} = \sum_{\ell=1}^{L} I_{s,t-\ell,v} \cdot \beta_{s,v} \cdot \gamma_{s,v}^{\ell-1}
 $$
 
 where `L = decay_length` (default 16 weeks).
@@ -231,49 +255,59 @@ $$
 
 **Parameter roles:**
 
-| Parameter | Typical interpretation |
-|---|---|
+
+| Parameter | Typical interpretation                                         |
+| --------- | -------------------------------------------------------------- |
 | `β_{s,v}` | Carryover intensity (fraction of instant effect that persists) |
-| `γ_{s,v}` | Decay rate ( closer to 1 → longer memory ) |
-| `L` | Maximum lag window |
+| `γ_{s,v}` | Decay rate ( closer to 1 → longer memory )                     |
+| `L`       | Maximum lag window                                             |
+
 
 This is related to **adstock** and **distributed lag** models in econometrics, and to beta-binomial / Weibull adstock variants used in industry MMM.
 
 ---
+
+
 
 ### Full decomposition
 
 Putting it all together:
 
 $$
-\hat{y}_{s,t} = \underbrace{B_s}_{\text{baseline}} \cdot \underbrace{M_{s,t}}_{\text{features + price}} + \underbrace{M_{s,t}^{\alpha}}_{\text{interaction}} \cdot \underbrace{\sum_v (I_{s,t,v} + C_{s,t,v})}_{\text{media ROI}}
+\hat{y}*{s,t} = \underbrace{B_s}*{\text{baseline}} \cdot \underbrace{M_{s,t}}*{\text{features + price}} + \underbrace{M*{s,t}^{\alpha}}*{\text{interaction}} \cdot \underbrace{\sum_v (I*{s,t,v} + C_{s,t,v})}_{\text{media ROI}}
 $$
 
 The training objective is **masked MSE** on training weeks plus optional regularization:
 
 $$
-\mathcal{L} = \frac{1}{|\Omega_{\text{train}}|} \sum_{(s,t) \in \Omega_{\text{train}}} (y_{s,t} - \hat{y}_{s,t})^2 + \mathcal{L}_{\text{reg}}
+\mathcal{L} = \frac{1}{|\Omega_{\text{train}}|} \sum_{(s,t) \in \Omega_{\text{train}}} (y_{s,t} - \hat{y}*{s,t})^2 + \mathcal{L}*{\text{reg}}
 $$
 
 Validation weeks are held out via `train_week_mask` / `val_week_mask`.
 
 ---
 
+
+
 ### Normalization
 
 All inputs are scaled using **training-set statistics only** (no leakage):
 
-| Quantity | Normalization |
-|---|---|
-| Target `y` | Divide by median training target |
-| Spends `x` | Divide by 80th percentile of positive spends (global) |
-| Features `f` | Z-score using training mean/std (pooled across series and time) |
-| Price `p` | Divide by series-specific mean price on training weeks |
+
+| Quantity                 | Normalization                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| Target `y`               | Divide by median training target                                                    |
+| Spends `x`               | Divide by 80th percentile of positive spends (global)                               |
+| Features `f`             | Z-score using training mean/std (pooled across series and time)                     |
+| Price `p`                | Divide by series-specific mean price on training weeks                              |
 | Vehicle axis scale `a_v` | 80th percentile of positive spend per vehicle (then divided by global spend factor) |
+
 
 Metadata stores all factors in `metadata.json` so predictions and artifacts can be mapped back to raw units.
 
 ---
+
+
 
 ## Repository layout
 
@@ -286,7 +320,7 @@ Metadata stores all factors in `metadata.json` so predictions and artifacts can 
 ├── data/
 │   └── generated/              # Example HDF5 bundle from the walkthrough
 ├── notebooks/
-│   └── toy_watchtower_mmm_walkthrough.ipynb
+│   └── toy_mmm_walkthrough.ipynb
 ├── src/
 │   └── toy_mmm/
 │       ├── model.py            # Top-level ToyMMMModel
@@ -307,6 +341,8 @@ Metadata stores all factors in `metadata.json` so predictions and artifacts can 
 
 ---
 
+
+
 ## Getting started with uv
 
 This project uses **[uv](https://docs.astral.sh/uv/)** for environment and dependency management. Install uv if you don't have it:
@@ -315,12 +351,16 @@ This project uses **[uv](https://docs.astral.sh/uv/)** for environment and depen
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
+
+
 ### 1. Clone and enter the repository
 
 ```bash
 git clone git@github.com:Hiteshyadav9996/Custom_Bayesian_MMM.git
 cd Custom_Bayesian_MMM
 ```
+
+
 
 ### 2. Create the virtual environment and install dependencies
 
@@ -341,7 +381,7 @@ Expected: all tests pass (HDF5 round-trip, pricing neutrality, short training sm
 ### 4. Run the walkthrough notebook
 
 ```bash
-uv run jupyter lab notebooks/toy_watchtower_mmm_walkthrough.ipynb
+uv run jupyter lab notebooks/toy_mmm_walkthrough.ipynb
 ```
 
 Or execute headlessly:
@@ -351,7 +391,7 @@ uv run jupyter nbconvert \
   --to notebook \
   --execute \
   --inplace \
-  notebooks/toy_watchtower_mmm_walkthrough.ipynb \
+  notebooks/toy_mmm_walkthrough.ipynb \
   --ExecutePreprocessor.timeout=900
 ```
 
@@ -373,6 +413,8 @@ print('Final train MSE:', result.history.iloc[-1]['train_mse'])
 ```
 
 ---
+
+
 
 ## End-to-end workflow
 
@@ -433,6 +475,8 @@ uv run python train_example.py
 
 ---
 
+
+
 ## Configuring the model for your own data
 
 You do **not** need the simulator for real data. The integration point is `normalize_raw_data`, which expects a `RawToyData` container.
@@ -469,18 +513,22 @@ config = ToyConfig(
 )
 ```
 
+
+
 ### Step 2 — Build `RawToyData` from your arrays
 
 Your raw arrays must match these shapes:
 
-| Field | Shape | Description |
-|---|---|---|
-| `features_raw` | `(S, T, K)` | Unscaled generic features |
-| `price_raw` | `(S, T)` | Price in natural units |
-| `spends_raw` | `(S, T, V)` | Media spend (0 allowed) |
-| `target_raw` | `(S, T)` | Volume/sales/revenue |
-| `train_week_mask` | `(T,)` bool | True for training weeks |
-| `val_week_mask` | `(T,)` bool | True for validation weeks |
+
+| Field             | Shape       | Description               |
+| ----------------- | ----------- | ------------------------- |
+| `features_raw`    | `(S, T, K)` | Unscaled generic features |
+| `price_raw`       | `(S, T)`    | Price in natural units    |
+| `spends_raw`      | `(S, T, V)` | Media spend (0 allowed)   |
+| `target_raw`      | `(S, T)`    | Volume/sales/revenue      |
+| `train_week_mask` | `(T,)` bool | True for training weeks   |
+| `val_week_mask`   | `(T,)` bool | True for validation weeks |
+
 
 ```python
 import numpy as np
@@ -513,6 +561,8 @@ raw = RawToyData(
 )
 ```
 
+
+
 ### Step 3 — Normalize, persist, and train
 
 ```python
@@ -531,26 +581,34 @@ write_hdf5_bundle(data, Path("data/my_run"))
 result = train_model(data, hyperparameters=hparams)
 ```
 
+
+
 ### Step 4 — Tune hyperparameters
 
 Copy and edit `config/toy_mmm_hyperparameters.yml`:
 
-| Section | What to adjust |
-|---|---|
-| `training.learning_rate` | Adam step size (default 0.012) |
-| `training.epochs` | Training length (default 1024) |
-| `training.fallback_l2_strength` | Base L2 when layer lambda is 0 |
-| `embeddings.*.layer_reg_lambda` | Enable partial pooling (try `0.00005`–`0.001`) |
-| `embeddings.*.reg_region/brand/channel/vehicle` | Relative shrinkage per axis |
-| `roi.sigmoid_curve.*` | Bounds on saturation (`asymptote`) and steepness (`slope`) |
-| `roi.beta_gamma.*` | Bounds on carryover (`beta`, `gamma`) |
-| `roi.alpha_mult.*` | Allowed range for interaction exponent α |
+
+| Section                                         | What to adjust                                             |
+| ----------------------------------------------- | ---------------------------------------------------------- |
+| `training.learning_rate`                        | Adam step size (default 0.012)                             |
+| `training.epochs`                               | Training length (default 1024)                             |
+| `training.fallback_l2_strength`                 | Base L2 when layer lambda is 0                             |
+| `embeddings.*.layer_reg_lambda`                 | Enable partial pooling (try `0.00005`–`0.001`)             |
+| `embeddings.*.reg_region/brand/channel/vehicle` | Relative shrinkage per axis                                |
+| `roi.sigmoid_curve.*`                           | Bounds on saturation (`asymptote`) and steepness (`slope`) |
+| `roi.beta_gamma.*`                              | Bounds on carryover (`beta`, `gamma`)                      |
+| `roi.alpha_mult.*`                              | Allowed range for interaction exponent α                   |
+
 
 **Tip:** Start with `layer_reg_lambda: 0.0` (no shrinkage) to verify the pipeline, then increase regularization if hierarchy parameters look overfit.
 
 ---
 
+
+
 ## Integrating into your system
+
+
 
 ### Option A — Import as a Python library (recommended)
 
@@ -576,6 +634,8 @@ from toy_mmm.artifacts import build_all_artifacts
 4. **Serve** → load checkpoint weights into `ToyMMMModel`, call `model(tensors, return_parts=True)` for decomposition
 5. **Report** → `build_all_artifacts` for contribution tables compatible with Plotly dashboards
 
+
+
 ### Option B — HDF5 bundle as the contract
 
 The HDF5 + JSON metadata bundle is the **stable IO contract** between data engineering and modeling:
@@ -596,12 +656,14 @@ HDF5 datasets: `features`, `price`, `vehicle_spends`, `target`, `investment_axis
 
 Layers are modular and can be reused independently:
 
-| Module | Use case |
-|---|---|
-| `SimplePricingLayer` | Standalone price elasticity curve |
+
+| Module                    | Use case                                     |
+| ------------------------- | -------------------------------------------- |
+| `SimplePricingLayer`      | Standalone price elasticity curve            |
 | `SimpleSigmoidCurveLayer` | Saturation curves for a single media channel |
-| `SimpleBetaGammaLayer` | Adstock on any instant impact series |
-| `SimpleHierEmbedding` | Generic partial-pooling embeddings |
+| `SimpleBetaGammaLayer`    | Adstock on any instant impact series         |
+| `SimpleHierEmbedding`     | Generic partial-pooling embeddings           |
+
 
 Example — pricing layer only:
 
@@ -619,6 +681,8 @@ result = layer.from_input(PricingInput(
 print(result.impact.numpy())  # >1 at low price, 1 at average, <1 at high price
 ```
 
+
+
 ### Option D — Export trained parameters
 
 Each training checkpoint contains:
@@ -634,6 +698,8 @@ deviation_norms = checkpoint["deviation_norms"]  # hierarchy deviation magnitude
 Use `diagnostics.layer_to_df(model, metadata)` to flatten hierarchy parameters into tidy DataFrames for BI tools.
 
 ---
+
+
 
 ## Hyperparameter reference
 
@@ -680,6 +746,8 @@ hparams = load_hyperparameters("config/toy_mmm_hyperparameters.yml")
 
 ---
 
+
+
 ## Diagnostics and artifacts
 
 After training:
@@ -704,17 +772,21 @@ The walkthrough notebook demonstrates Plotly charts for decomposition, convergen
 
 ---
 
+
+
 ## Limitations and extensions
 
 This is a **teaching implementation**, not a full production MMM platform:
 
-| Topic | Status in this repo |
-|---|---|
+
+| Topic                         | Status in this repo                         |
+| ----------------------------- | ------------------------------------------- |
 | Bayesian inference (MCMC, VI) | Not implemented — point estimation via Adam |
-| Uncertainty quantification | Not implemented |
-| Multi-stage calibration | Not implemented (single training stage) |
-| Automated feature selection | Not implemented |
-| Custom priors / constraints | Priors via initialization only |
+| Uncertainty quantification    | Not implemented                             |
+| Multi-stage calibration       | Not implemented (single training stage)     |
+| Automated feature selection   | Not implemented                             |
+| Custom priors / constraints   | Priors via initialization only              |
+
 
 **Natural extensions** for practitioners:
 
@@ -725,6 +797,8 @@ This is a **teaching implementation**, not a full production MMM platform:
 - Export to ONNX / TF Serving for production scoring
 
 ---
+
+
 
 ## Quick reference commands (uv)
 
@@ -739,7 +813,7 @@ uv run pytest
 uv run pytest -v
 
 # Open notebook
-uv run jupyter lab notebooks/toy_watchtower_mmm_walkthrough.ipynb
+uv run jupyter lab notebooks/toy_mmm_walkthrough.ipynb
 
 # Add a new dependency
 uv add <package-name>
@@ -749,6 +823,8 @@ uv add --group dev <package-name>
 ```
 
 ---
+
+
 
 ## License
 
