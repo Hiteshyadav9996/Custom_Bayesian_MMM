@@ -36,11 +36,11 @@ The main training knobs live in `config/toy_mmm_hyperparameters.yml`:
 
 ## Quick Start
 
-From the Watchtower repo root:
+From the repo root:
 
 ```bash
-PYTHONPATH=toy_watchtower_mmm/src .venv/bin/python -m pytest toy_watchtower_mmm/tests
-MPLCONFIGDIR=/private/tmp/watchtower_mpl_cache .venv/bin/python -m jupyter nbconvert --to notebook --execute --inplace toy_watchtower_mmm/notebooks/toy_watchtower_mmm_walkthrough.ipynb --ExecutePreprocessor.timeout=900
+PYTHONPATH=src .venv/bin/python -m pytest tests
+MPLCONFIGDIR=/private/tmp/watchtower_mpl_cache .venv/bin/python -m jupyter nbconvert --to notebook --execute --inplace notebooks/toy_watchtower_mmm_walkthrough.ipynb --ExecutePreprocessor.timeout=900
 ```
 
-The notebook writes its tiny HDF5 bundle under `toy_watchtower_mmm/data/generated/`.
+The notebook writes its tiny HDF5 bundle under `data/generated/`.
