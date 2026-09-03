@@ -30,7 +30,7 @@ class PricingIntermediaries:
 
 
 class SimplePricingLayer(keras.layers.Layer):
-    """Standalone version of Watchtower-style multiplicative pricing elasticity."""
+    """Standalone multiplicative pricing elasticity layer."""
 
     def __init__(
         self,

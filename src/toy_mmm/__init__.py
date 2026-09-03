@@ -1,4 +1,4 @@
-"""Small standalone Watchtower-style MMM teaching package."""
+"""Small standalone MMM teaching package."""
 
 from toy_mmm.config import ToyConfig, default_config
 from toy_mmm.hdf5_io import load_hdf5_bundle, write_hdf5_bundle
